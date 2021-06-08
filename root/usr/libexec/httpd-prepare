@@ -1,0 +1,29 @@
+#!/bin/bash
+
+mkdir -p ${APP_ROOT}/etc/httpd.d
+chmod -R a+rwx /etc/httpd/conf
+chmod -R a+rwx /etc/httpd/conf.d
+chmod -R a+rwx ${APP_ROOT}/etc
+# chmod -R a+rwx /var/www/httpd
+chown -R postgres:0 ${APP_ROOT}
+chown -R postgres:0 /var/www
+chmod g+rwx /var/www
+chown -R postgres:0 /var/log/httpd
+chmod g+rwx /var/log/httpd
+
+mkdir -p /etc/httpd/sites-available
+mkdir -p /etc/httpd/sites-enabled
+
+
+mkdir -p ${HTTPD_CONTAINER_SCRIPTS_PATH}/pre-init
+
+cat << EOF > /etc/httpd/conf.d/nominatim.conf 
+<Directory "${HOME}/website">
+  Options FollowSymLinks MultiViews
+  AddType text/html   .php
+  DirectoryIndex search.php
+  Require all granted
+</Directory>
+
+Alias /nominatim ${HOME}/website
+EOF

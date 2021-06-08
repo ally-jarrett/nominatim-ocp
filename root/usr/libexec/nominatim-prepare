@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cat << EOF >> $HOME/settings/local.php
+<?php
+@define('CONST_Database_Web_User', 'apache');
+@define('CONST_Website_BaseURL', '/nominatim/');
+@define('CONST_Database_DSN', 'pgsql://@/nominatim');
+@define('CONST_Osm2pgsql_Flatnode_File', '$OSM_FLAT_FILE/flatnode.file');
+EOF
