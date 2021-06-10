@@ -12,7 +12,7 @@ ENV USERHOME=/nominatim \
 
 ENV SUMMARY="Nominatm" \
     DESCRIPTION="Nominatim" \
-    PBF_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
+    PBF_URL=http://download.geofabrik.de/europe/great-britain-latest.osm.pbf
 
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
