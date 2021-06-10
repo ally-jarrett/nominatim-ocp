@@ -91,11 +91,11 @@ RUN nominatim refresh --website \
 
 # Copy over seed scripts
 COPY init.sh $USERHOME/init.sh
-RUN $USERHOME/init.sh
+#RUN $USERHOME/init.sh
 
 EXPOSE 5432
 #EXPOSE 8080
 
-USER 26
+#USER 26
 
 ##CMD ["/usr/bin/run-nominatim"]
