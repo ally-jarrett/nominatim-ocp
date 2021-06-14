@@ -1,0 +1,15 @@
+apiVersion: v1
+name: nominatim-postgres
+description: Deploys a single PostgreSQL primary database with custom configurations.
+version: 1.0.0
+appVersion: 3.7.2
+keywords:
+- postgresql
+- postgres
+- database
+- sql
+- nominatim
+home: https://nominatim.org/
+icon: https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Openstreetmap_logo.svg/1200px-Openstreetmap_logo.svg.png
+sources:
+- https://github.com/ally-jarrett/nominatim-ocp

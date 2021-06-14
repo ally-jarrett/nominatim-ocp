@@ -1,0 +1,35 @@
+name: nominatim-postgres
+container:
+  port: 5432
+  name: nominatim-postgres
+  mountPath: /pgdata
+serviceType: ClusterIP
+image:
+  repository: ajarrett
+  container: nominatim-postgres
+  tag: latest
+  stream:
+    namespace: ally-test
+resources:
+  cpu: 400m
+  memory: 1Gb
+  storage:
+    name: nominatim-postgres
+    size: 10Gi
+    mode: ReadWriteOnce
+    className: gp2
+configMap:
+  name: nominatim-postgres
+source:
+  repositoryUrl: https://github.com/ally-jarrett/nominatim-ocp
+  repositoryRef:
+  contextDir: postgres
+postgres:
+  username: postgres
+  password: password
+nominatim:
+  username: nominatim
+  password: password
+  web:
+    username: www-data
+    password: password

@@ -1,0 +1,32 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: {{ .Values.name | quote }}
+  annotations:
+    description: Defines how to build the application
+spec:
+  source:
+    type: Git
+    git:
+      uri: {{ .Values.source.repositoryUrl | quote }}
+      ref: {{ .Values.source.repositoryRef | quote }}
+    contextDir: {{ .Values.source.contextDir | quote }}
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ print .Values.name ":latest" | quote }}
+  triggers:
+    - type: ImageChange
+    - type: ConfigChange
+#    - type: GitHub
+#      github:
+#        secret: {{ .Values.github_webhook_secret | default (randAlphaNum 40) | quote }}
+#    - type: Generic
+#      generic:
+#        secret: {{ .Values.generic_webhook_secret | default (randAlphaNum 40) | quote }}
+#  postCommit:
+#    script: npm test

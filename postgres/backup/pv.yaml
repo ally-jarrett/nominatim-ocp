@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{.Values.resources.storage.name}}-volume
+spec:
+  capacity:
+    storage: {{.Values.resources.storage.size}}
+  storageClassName: {{.Values.resources.storage.className}}
+  accessModes:
+    - {{.Values.resources.storage.mode}}
+  persistentVolumeReclaimPolicy: Retain

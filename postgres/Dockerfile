@@ -16,7 +16,7 @@ LABEL summary="$SUMMARY" \
 
 USER 0
 
-COPY /root/usr/libexec/fix-permissions /usr/libexec/fix-permissions
+COPY /postgres/root /usr/libexec/fix-permissions
 RUN chmod a+x /usr/libexec/fix-permissions
 
 # Copy Nominatim.so module :: NOMINATIM_DATABASE_MODULE_PATH=/nominatim/module

@@ -26,7 +26,7 @@ LABEL summary="$SUMMARY" \
       maintainer="Ally Jarrett <ajarrett@redhat.com>"
 
 # from https://github.com/sclorg/postgresql-container/blob/generated/9.6/Dockerfile
-COPY root/usr/libexec/fix-permissions /usr/libexec/fix-permissions
+COPY postgres/root /usr/libexec/fix-permissions
 RUN chmod a+x /usr/libexec/fix-permissions
 
 # Create Nominatim User
