@@ -16,12 +16,12 @@ LABEL summary="$SUMMARY" \
 
 USER 0
 
-COPY /postgres/root /usr/libexec/fix-permissions
+COPY /root/usr/libexec/fix-permissions /usr/libexec/fix-permissions
 RUN chmod a+x /usr/libexec/fix-permissions
 
 # Copy Nominatim.so module :: NOMINATIM_DATABASE_MODULE_PATH=/nominatim/module
 RUN mkdir -p $NOM_HOME/module
-COPY nominatim.so $NOM_HOME/module
+COPY files/nominatim.so $NOM_HOME/module
 RUN /usr/libexec/fix-permissions $NOM_HOME/module
 
 ENTRYPOINT ["/opt/cpm/bin/uid_postgres.sh"]
