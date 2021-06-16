@@ -100,12 +100,12 @@ spec:
             - name: PG_USER
               valueFrom:
                 secretKeyRef:
-                  key: nom-username
+                  key: nom_username
                   name: nominatim-secret
             - name: PG_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: nom-password
+                  key: nom_password
                   name: nominatim-secret
             - name: PG_DATABASE
               value: userdb
