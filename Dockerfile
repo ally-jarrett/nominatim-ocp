@@ -10,9 +10,10 @@ ENV USERHOME=/nominatim \
     PGDATA=/var/lib/pgsql/data \
     NOMINATIM_VERSION=3.7.1
 
+#http://download.geofabrik.de/europe/great-britain-latest.osm.pbf
 ENV SUMMARY="Nominatm" \
     DESCRIPTION="Nominatim" \
-    PBF_URL=http://download.geofabrik.de/europe/great-britain-latest.osm.pbf
+    PBF_URL=http://download.geofabrik.de/europe/monaco-latest.osm.pbf
 
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
@@ -26,7 +27,7 @@ LABEL summary="$SUMMARY" \
       maintainer="Ally Jarrett <ajarrett@redhat.com>"
 
 # from https://github.com/sclorg/postgresql-container/blob/generated/9.6/Dockerfile
-COPY postgres/root /usr/libexec/fix-permissions
+COPY postgres/root/usr/libexec/fix-permissions /usr/libexec/fix-permissions
 RUN chmod a+x /usr/libexec/fix-permissions
 
 # Create Nominatim User
@@ -90,11 +91,12 @@ RUN nominatim refresh --website \
     && /usr/libexec/fix-permissions $USERHOME/website
 
 # Copy over seed scripts
-COPY init.sh $USERHOME/init.sh
-#RUN $USERHOME/init.sh
+COPY init.sh nom-web.sh $USERHOME
+RUN $USERHOME/init.sh
+#RUN chmod a+x $USERHOME/nom-web.sh && $USERHOME/nom-web.sh
 
 EXPOSE 5432
-#EXPOSE 8080
+EXPOSE 80
 
 #USER 26
 

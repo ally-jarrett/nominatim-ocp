@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-secret
+data:
+  username: {{ .Values.postgres.username | b64enc }}
+  password: {{ .Values.postgres.password | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nominatim-secret
+data:
+  nom_username: {{ .Values.nominatim.username | b64enc }}
+  nom_password: {{ .Values.nominatim.password | b64enc }}
+  nom_web_username: {{ .Values.nominatim.web.username | b64enc }}
+  nom_web_password: {{ .Values.nominatim.web.password | b64enc }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{.Values.container.name}}"
+  labels:
+    name: "{{.Values.container.name}}"
+    heritage: {{ .Release.Service | quote }}
+    release: {{ .Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+spec:
+  type: "{{.Values.serviceType}}"
+  ports:
+    - protocol: TCP
+      port: {{.Values.container.port}}
+      targetPort: {{.Values.container.port}}
+      nodePort: 0
+      name: postgres
+  selector:
+    name: "{{.Values.container.name}}"
+  sessionAffinity: None
+#---
+#kind: PersistentVolumeClaim
+#apiVersion: v1
+#metadata:
+#  name: {{.Values.resources.storage.name}}-claim
+#spec:
+#  storageClassName: {{.Values.resources.storage.className}}
+#  accessModes:
+#    - {{.Values.resources.storage.mode}}
+#  resources:
+#    requests:
+#      storage: {{.Values.resources.storage.size}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{.Values.configMap.name}}"
+data:
+  {{ (.Files.Glob "postgres/configs/*").AsConfig | indent 2 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{.Values.container.name}}"
+  labels:
+    name: "{{.Values.container.name}}"
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    alpha.image.policy.openshift.io/resolve-names: '*'
+    "helm.sh/created": {{ now | unixEpoch | quote}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: "{{.Values.container.name}}"
+  template:
+    metadata:
+      labels:
+        name: "{{.Values.container.name}}"
+      name: "{{.Values.container.name}}"
+    spec:
+      containers:
+        - env:
+            - name: PGHOST
+              value: /tmp
+            - name: PG_MODE
+              value: primary
+            - name: PG_PRIMARY_PORT
+              value: "{{.Values.container.port}}"
+            - name: PG_PRIMARY_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: postgres-secret
+            - name: PG_PRIMARY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: postgres-secret
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: nominatim-secret
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: nominatim-secret
+            - name: PG_DATABASE
+              value: userdb
+            - name: PG_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: postgres-secret
+          image: "{{.Values.image.container}}:{{.Values.image.tag}}"
+          imagePullPolicy: Always
+          name: "{{.Values.container.name}}"
+          ports:
+            - containerPort: {{.Values.container.port}}
+              protocol: TCP
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+            - mountPath: /pgdata
+              name: pgdata
+            - mountPath: /backup
+              name: backup
+              readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - emptyDir: {}
+          name: pgdata
+        - emptyDir: {}
+          name: backup

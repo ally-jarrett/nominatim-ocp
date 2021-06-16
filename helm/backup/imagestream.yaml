@@ -4,3 +4,6 @@ metadata:
   name: {{ .Values.name | quote }}
   annotations:
     description: {{ .Values.name }} imagestream
+spec:
+  lookupPolicy:
+    local: true

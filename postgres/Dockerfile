@@ -14,6 +14,8 @@ LABEL summary="$SUMMARY" \
       version=1.0 \
       maintainer="Ally Jarrett <ajarrett@redhat.com>"
 
+EXPOSE 5432
+
 USER 0
 
 COPY /root/usr/libexec/fix-permissions /usr/libexec/fix-permissions

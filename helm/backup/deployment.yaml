@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{.Values.container.name}}"
+  labels:
+    name: "{{.Values.container.name}}"
+    heritage: {{.Release.Service | quote }}
+    release: {{.Release.Name | quote }}
+    chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    alpha.image.policy.openshift.io/resolve-names: '*'
+    "helm.sh/created": {{ now | unixEpoch | quote}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: "{{.Values.container.name}}"
+  template:
+    metadata:
+      labels:
+        name: "{{.Values.container.name}}"
+      name: "{{.Values.container.name}}"
+    spec:
+      containers:
+        - env:
+            - name: PGHOST
+              value: /tmp
+            - name: PG_MODE
+              value: primary
+            - name: PG_PRIMARY_PORT
+              value: "{{.Values.container.port}}"
+            - name: PG_PRIMARY_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: postgres-secret
+            - name: PG_PRIMARY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: postgres-secret
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: nominatim-secret
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: nominatim-secret
+            - name: PG_DATABASE
+              value: userdb
+            - name: PG_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: postgres-secret
+          image: "{{.Values.image.container}}:{{.Values.image.tag}}"
+          imagePullPolicy: Always
+          name: "{{.Values.container.name}}"
+          ports:
+            - containerPort: {{.Values.container.port}}
+              protocol: TCP
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+            - mountPath: /pgdata
+              name: pgdata
+            - mountPath: /backup
+              name: backup
+              readOnly: true
+#            - mountPath: /pguser
+#              name: pguser-volume
+#            - mountPath: /pgprimary
+#              name: pgprimary-volume
+#            - mountPath: /pgroot
+#              name: pgroot-volume
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - emptyDir: {}
+          name: pgdata
+        - emptyDir: {}
+          name: backup
+#        - name: pguser-volume
+#          secret:
+#            secretName: pguser-secret
+#        - name: pgprimary-volume
+#          secret:
+#            secretName: pgprimary-secret
+#        - name: pgroot-volume
+#          secret:
+#            secretName: pgroot-secret

@@ -1,0 +1,114 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: nominatim
+  namespace: geo
+  selfLink: /apis/apps/v1/namespaces/geo/statefulsets/nominatim
+  uid: fd1307dd-5068-4bda-9b7f-b77a7c533403
+  resourceVersion: '55791507'
+  generation: 3
+  creationTimestamp: '2021-04-07T09:44:25Z'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nominatim
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nominatim
+    spec:
+      restartPolicy: Always
+      serviceAccountName: nominatim
+      imagePullSecrets:
+        - name: acr-creds
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        fsGroup: 102
+      containers:
+        - resources:
+            limits:
+              cpu: '1'
+              memory: 1000Mi
+            requests:
+              cpu: 250m
+              memory: 500Mi
+          terminationMessagePath: /dev/termination-log
+          name: nominatim-api
+          command:
+            - bash
+          securityContext: {}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: config-volume
+              mountPath: /data
+          terminationMessagePolicy: File
+          image: '006containerregistry.azurecr.io/nominatim:no-root'
+          args:
+            - /app/startapache.sh
+        - resources:
+            limits:
+              cpu: '1'
+              memory: 1000Mi
+            requests:
+              cpu: 250m
+              memory: 500Mi
+          terminationMessagePath: /dev/termination-log
+          name: nominatim-db
+          command:
+            - bash
+          securityContext:
+            runAsUser: 101
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: nominatim-data
+              mountPath: /var/lib/postgresql/12/main
+          terminationMessagePolicy: File
+          image: '006containerregistry.azurecr.io/nominatim:no-root'
+          args:
+            - /app/startpostgres.sh
+      serviceAccount: nominatim
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nominatim-api
+            defaultMode: 420
+      dnsPolicy: ClusterFirst
+  volumeClaimTemplates:
+    - metadata:
+        name: nominatim-data
+        creationTimestamp: null
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 60Gi
+        storageClassName: managed-premium
+        volumeMode: Filesystem
+      status:
+        phase: Pending
+  serviceName: nominatim
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  revisionHistoryLimit: 10
+status:
+  observedGeneration: 3
+  replicas: 1
+  readyReplicas: 1
+  currentReplicas: 1
+  updatedReplicas: 1
+  currentRevision: nominatim-8687f6657d
+  updateRevision: nominatim-8687f6657d
+  collisionCount: 0
